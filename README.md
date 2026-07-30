@@ -35,13 +35,22 @@ Three zones on one hypervisor, all inter-zone traffic routed by the dedicated OP
 
 All traffic is permitted between the attacker and victim zones. Both of these zones are denied access to the WAN and WAN traffic destined for Opnsense's local area network (LAN) is also denied, ensuring that the attacker and victim zones have no access to the internet. Full topology, addressing, data flows, trust boundaries, and threat model are documented in docs/Architecture.md.
 
+## Key Findings
+- A correctly enabled ET signatures for the Nmap -sV SYN sweep, vsftpd 2.3.4 backdoor and post-exploitation activity silently failed to fire because HOME_NET defaulted to all RFC1918 space, placing the attacker inside the trusted network. Diagnosed by observing that every firing rule had a HOME_NET source address.
+- Nmap scan findings (needs completion)
+- Exploitation and post exploitation findings (needs completion)
+
 ## Stack
  
 | Component | Role |
 |---|---|
+| Proxmox VE | Hypervisor |
 | OPNsense | Firewall / router / IDS between zones |
-| Kali Linux | Attacker |
-| Metasploitable 2 | Victim |
+| Suricata + ET Open rules with Hyperscan | Detection |
+| Kali Linux | Attacker platform |
+| Nmap and Metasploit | Specific attacker tooling |
+| Wireshark | Traffic analysis |
+| Metasploitable 2 | Victim platform |
 
 ## Limitations
 - **Single physical NIC** — zone segmentation is software-only (Linux bridges). A hypervisor compromise collapses every boundary.
