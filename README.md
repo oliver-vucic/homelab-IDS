@@ -4,9 +4,9 @@ This is a segemented IDS detection lab built on a single Proxmox host. A Kali Li
 VM, the victim device. While in transit, this traffic is routed through an Opnsense VM, that connects the two subnets and also employs an intrusion detection system (IDS), to search for indicators 
 of malicious activity. 
 
-**Content:** Architecture, design choices and considerations, and the undertaken exercises for this project are outlined in the rest of the repository.
+**Content:** Architecture, design choices and considerations, and the undertaken exercises are outlined in the rest of the repository.
 
-**Goal:** With this being my first cyber focused project and my first time using the Proxmox platform, this project had a triple focus of familiarising myself with Proxmox (i.e. understanding VM creation and 
+**Goal:** With this being my first cyber focused project and my first time using the Proxmox platform, this had a triple focus of familiarising myself with Proxmox (i.e. understanding VM creation and 
 maintenance, routing, the firewall and IDS service), accustomising myself with IDS rules and alerts and improving my network traffic analysis skills. 
 
 ## Architecture Overview
@@ -22,10 +22,40 @@ flowchart LR
     subgraph ATTACKER_NET["ATTACKER_NET zone - No internet"]
         KALI["Kali VM - attacker"]
     end
-    FW["OPNsense firewall<br/>default-deny inter-zone"]
+    FW["OPNsense firewall<br/>allow inter-zone\ndefault-deny WAN"]
     FW_WAN --- FW
     FW --- VICTIM
     FW --- KALI
 ```
 
-Three zones on one hypervisor, all inter-zone traffic routed and filtered by a dedicated OPNsense VM:
+Three zones on one hypervisor, all inter-zone traffic routed by the dedicated OPNsense VM:
+- **VICTIM_NET** — The zone that attack traffic is directed to. Hosts the Victim (Metasploitable 2).
+- **ATTACKER_NET** — The zone that contains the Attacker (Kali).
+- **WAN** — uplink to the home LAN.
+
+All traffic is permitted between the attacker and victim zones. Both of these zones are denied access to the WAN and WAN traffic destined for Opnsense's local area network (LAN) is also denied, ensuring that the attacker and victim zones have no access to the internet. Full topology, addressing, data flows, trust boundaries, and threat model are documented in docs/Architecture.md.
+
+## Stack
+ 
+| Component | Role |
+|---|---|
+| OPNsense | Firewall / router / IDS between zones |
+| Kali Linux | Attacker |
+| Metasploitable 2 | Victim |
+
+## Limitations
+- **Single physical NIC** — zone segmentation is software-only (Linux bridges). A hypervisor compromise collapses every boundary.
+- **Proxmox web UI on the WAN bridge** — reachable for everyone on the home LAN.
+
+
+## Repository Layout
+```
+homelab-IDS_Practice/
+├── main/        # contains README file
+├── docs/        # architecture and design decisions
+└── exercises/   # attack scenarios and the detections
+```
+ 
+## Disclaimer
+ 
+Attacks conducted in this project target machines I own, on an isolated network with no internet route.
