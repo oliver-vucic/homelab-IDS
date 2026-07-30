@@ -6,8 +6,10 @@ of malicious activity.
 
 **Content:** Architecture, design choices and considerations, and the undertaken exercises are outlined in the rest of the repository.
 
-**Goal:** With this being my first cyber focused project and my first time using the Proxmox platform, this had a triple focus of familiarising myself with Proxmox (i.e. understanding VM creation and 
-maintenance, routing, the firewall and IDS service), accustomising myself with IDS rules and alerts and improving my network traffic analysis skills. 
+**Goal:** This lab tests whether a signature-based IDS detects a realistic recon-to-exploit chain when the attacker is internal, and to document where it fails. 
+
+<!--- With this being my first cyber focused project and my first time using the Proxmox platform, this had a triple focus of familiarising myself with Proxmox (i.e. understanding VM creation and 
+maintenance, routing, the firewall and IDS service), accustomising myself with IDS rules and alerts and improving my network traffic analysis skills. --->
 
 ## Architecture Overview
 
@@ -22,7 +24,7 @@ flowchart LR
     subgraph ATTACKER_NET["ATTACKER_NET zone - No internet"]
         KALI["Kali VM - attacker"]
     end
-    FW["OPNsense firewall<br/>allow inter-zone\ndefault-deny WAN"]
+    FW["OPNsense firewall<br/>allow inter-zone<br/>default-deny WAN"]
     FW_WAN --- FW
     FW --- VICTIM
     FW --- KALI
@@ -60,9 +62,10 @@ All traffic is permitted between the attacker and victim zones. Both of these zo
 ## Repository Layout
 ```
 homelab-IDS_Practice/
-├── main/        # contains README file
-├── docs/        # architecture and design decisions
-└── exercises/   # attack scenarios and the detections
+├── README.md
+└── docs/
+    ├── architecture.md
+    └── exercises.md
 ```
  
 ## Disclaimer
