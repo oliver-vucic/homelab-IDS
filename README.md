@@ -9,18 +9,18 @@ This is a segmented intrusion detection system (IDS) lab, built on a single Prox
 ```mermaid
 flowchart LR
     subgraph WAN["WAN - home LAN"]
-        FW_WAN["OPNsense WAN"]
+        HOME["OPNsense WAN"]
     end
-    subgraph VICTIM_NET["VICTIM_NET zone - No internet"]
+    subgraph VICTIM_NET["VICTIM_NET zone"]
         VICTIM["Metasploitable 2 VM - victim"]
     end
-    subgraph ATTACKER_NET["ATTACKER_NET zone - No internet"]
+    subgraph ATTACKER_NET["ATTACKER_NET zone"]
         KALI["Kali VM - attacker"]
     end
-    FW["OPNsense firewall<br/>allow inter-zone<br/>default-deny WAN"]
-    FW_WAN --- FW
-    FW --- VICTIM
-    FW --- KALI
+    FW["OPNsense router/firewall<br/><br/>Suricata IDS - inspecting victim zone interface<br/>IDS-only - alert only, no blocking<br/>HOME_NET - scoped to victim zone"]
+    HOME -.->|"no route to lab zones"| FW
+    FW -->|"attack traffic"| VICTIM
+    KALI -->|"attack traffic"| FW
 ```
 
 Three zones on one hypervisor, all inter-zone traffic routed by the dedicated OPNsense VM:
