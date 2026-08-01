@@ -8,4 +8,4 @@ The device that hosts the Proxmox VE is a HP EliteDesk 800 G3 Mini. The hardware
 - single NIC
 - 256GB total device storage
 
-This platform is comfortable at supporting the three VMs it hosts.
+This platform is comfortable at supporting the three VMs it hosts, because of the amount of RAM memory, the four cores and the sizeable storage.
