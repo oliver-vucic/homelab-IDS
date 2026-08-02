@@ -41,9 +41,9 @@ This platform is more than capable at supporting the three VMs it hosts, because
 <br/>
 
 **OPNsense Interface Names:**
-- vmbr0 (vtnet0) --> WAN
-- vmbr1 (vtnet1) --> OPT1
-- vmbr2 (vtnet2) --> LAN
+- WAN_INT (vtnet0) --> WAN
+- ATTACKER_INT (vtnet1) --> OPT1
+- VICTIM_INT (vtnet2) --> LAN
 
 **Addressing Scheme Reasoning:** To differentiate from the WAN network address, 172.16.0.0/12 local address range was chosen. VICTIM_NET and ATTACKER_NET both have a 255.255.255.0 subnet mask because of the byte boundary simplicity.
 
@@ -58,20 +58,30 @@ flowchart LR
     subgraph ATTACKER_NET["ATTACKER_NET Zone - 172.16.2.0/24"]
         KALI["Kali VM - Interface=net0 (172.16.2.2)"]
     end
-    FW["OPNsense router/firewall<br/><br/>WAN Interface=net0 (192.168.1.119)<br/><br/>ATTACKER_NET Interface=net1 (172.16.2.1)<br/><br/>VICTIM_NET Interface=net2 (172.16.1.1)"]
+    FW["OPNsense router/firewall<br/><br/>WAN_INT (192.168.1.119)<br/><br/>ATTACKER_INT (172.16.2.1)<br/><br/>VICTIM_INT (172.16.1.1)"]
     HOME --- FW
     FW --- VICTIM
     KALI --- FW
 ```
 
-## Firewall Policy ##
+## Zone and trust model ##
 
+
+
+
+## Firewall Policy ##
 
 | Interface | Source | Destination | Port | Action | Rationale |
 |---|---|---|---|---|---|
-| WAN | VICTIM_NET, ATTACKER_NET | Any | Any | Reject | To deny ATTACKER and VICTIM networks from WAN |
+| WAN_INT | VICTIM_NET, ATTACKER_NET | Any | Any | Reject | To deny ATTACKER and VICTIM networks from WAN |
+| ATTACKER_INT | ATTACKER_NET | VICTIM_NET | Any | Pass | To allow all attack traffic to pass to victim LAN |
+| VICTIM_INT | VICTIM_NET | Any | Any | Pass | To allow all victim traffic to leave VICTIM_NET. This is a default rule for the interface assigned as LAN on OPNsense. |
+| ATTACKER_INT | 172.16.2.2 | 172.16.2.1 | Any | Pass | To allow the attacker to communicate with the gateway and access the OPNsense GUI. |
+| WAN_INT | WAN | 192.168.1.119, ATTACKER_NET, VICTIM_NET | Any | Pass | To allow all attack traffic to pass to victim LAN |
 | vmbr1 | ATTACKER_NET | 172.16.2.0/24 | 172.16.2.1 |
 | vmbr2 | VICTIM_NET | 172.16.1.0/24 | 172.16.1.1 |
+
+## IDS design ##
 
 
 
