@@ -2,7 +2,7 @@
 
 This is a segmented intrusion detection system (IDS) lab, built on a single Proxmox host. A Kali Linux virtual machine (VM) sends attack traffic from its network segment to a separate one containing a Metasploitable 2 VM, the victim device. All traffic between the two segments transits an OPNsense VM, which routes between the subnets and runs Suricata to inspect it for indicators of malicious activity.
 
-**Goal:** This lab tests whether a signature-based IDS detects a realistic recon-to-exploit chain when the attacker is internal, and to document where it fails. 
+**Goal:** This lab aims to analyse a signature-based IDS detection of a realistic recon-to-exploit chain when the attacker is internal, and to document what traffic triggered each signature and identify where it fails.
 
 ## Architecture Overview
 
