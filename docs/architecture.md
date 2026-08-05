@@ -71,15 +71,18 @@ flowchart LR
 
 ## Firewall Policy ##
 
+The table below contains, in rule order, the main configured or default firewall rules that are relevant to the project's aim.
+
 | Interface | Source | Destination | Port | Action | Rationale |
 |---|---|---|---|---|---|
-| WAN_INT | VICTIM_NET, ATTACKER_NET | Any | Any | Reject | To deny ATTACKER and VICTIM networks from WAN |
+| ATTACKER_INT | ATTACKER_NET | WAN | Any | Reject | To deny ATTACKER network access to WAN |
 | ATTACKER_INT | ATTACKER_NET | VICTIM_NET | Any | Pass | To allow all attack traffic to pass to victim LAN |
-| VICTIM_INT | VICTIM_NET | Any | Any | Pass | To allow all victim traffic to leave VICTIM_NET. This is a default rule for the interface assigned as LAN on OPNsense. |
-| ATTACKER_INT | 172.16.2.2 | 172.16.2.1 | Any | Pass | To allow the attacker to communicate with the gateway and access the OPNsense GUI. |
-| WAN_INT | WAN | 192.168.1.119, ATTACKER_NET, VICTIM_NET | Any | Pass | To allow all attack traffic to pass to victim LAN |
-| vmbr1 | ATTACKER_NET | 172.16.2.0/24 | 172.16.2.1 |
-| vmbr2 | VICTIM_NET | 172.16.1.0/24 | 172.16.1.1 |
+| ATTACKER_INT | 172.16.2.2 | 172.16.2.1 | Any | Pass | To allow the attacker to communicate with its OPNsense gateway and access the router's GUI |
+| VICTIM_INT | VICTIM_NET | WAN | Any | Reject | To deny VICTIM network access to WAN |
+| VICTIM_INT | VICTIM_NET | Any | Any | Pass | To allow all victim traffic to leave VICTIM_NET. This is a default rule for the interface assigned as LAN on OPNsense |
+| Any | Any | Any | Any | Block | Default deny rule |
+
+<!--The inter-zone firewall rule, in row two, was deliberate to allow all attacker-to-victim traffic across the OPNsense boundary, so that it would traverse the IDS sensor. It must be noted that this normally should not be allowed between a **trusted and untrusted zone**. Denial of WAN traffic was enforced to isolate the lab from my home network (see row one of the table). For the goal of the project, the attacker and victim machines do not need to communicate with outside networks.--> 
 
 ## IDS design ##
 
