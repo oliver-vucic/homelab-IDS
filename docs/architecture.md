@@ -71,18 +71,17 @@ flowchart LR
 
 ## Firewall Policy ##
 
-The table below contains, in rule order, the main configured or default firewall rules that are relevant to the project's aim.
+OPNsense uses pf (Packet Filter), the native stateful packet filtering engine from the FreeBSD operating system. The table below contains the configured firewall rules that are relevant to the project. 
 
 | Interface | Source | Destination | Port | Action | Rationale |
 |---|---|---|---|---|---|
-| ATTACKER_INT | ATTACKER_NET | WAN | Any | Reject | To deny ATTACKER network access to WAN |
-| ATTACKER_INT | ATTACKER_NET | VICTIM_NET | Any | Pass | To allow all attack traffic to pass to victim LAN |
-| ATTACKER_INT | 172.16.2.2 | 172.16.2.1 | Any | Pass | To allow the attacker to communicate with its OPNsense gateway and access the router's GUI |
-| VICTIM_INT | VICTIM_NET | WAN | Any | Reject | To deny VICTIM network access to WAN |
-| VICTIM_INT | VICTIM_NET | Any | Any | Pass | To allow all victim traffic to leave VICTIM_NET. This is a default rule for the interface assigned as LAN on OPNsense |
-| Any | Any | Any | Any | Block | Default deny rule |
+| ATTACKER_INT | ATTACKER_NET | VICTIM_NET | Any | Pass | To allow all attack traffic to pass to VICTIM_NET. |
+| ATTACKER_INT | 172.16.2.2 | 172.16.2.1 | Any | Pass | To allow the attacker to communicate with its OPNsense gateway and access the router's GUI. This is a weakness but it is for convenience over correctness. |
+| VICTIM_INT | VICTIM_NET | ATTACKER_NET | Any | Pass | To allow victim traffic to pass to ATTACKER_NET. |
 
-<!--The inter-zone firewall rule, in row two, was deliberate to allow all attacker-to-victim traffic across the OPNsense boundary, so that it would traverse the IDS sensor. It must be noted that this normally should not be allowed between a **trusted and untrusted zone**. Denial of WAN traffic was enforced to isolate the lab from my home network (see row one of the table). For the goal of the project, the attacker and victim machines do not need to communicate with outside networks.--> 
+The inter-zone firewall rules, in rows one and three, were deliberately configured to allow all attacker-to-victim traffic across the OPNsense boundary, so that it would traverse the IDS sensor. Because pf is stateful, each pass rule creates a state entry when a connection is initiated, so return traffic is permitted automatically and no rules are required in the reverse direction. The rule in the first row allows the attacker to initiate communication with the victim machine, for reconnaissance and exploitation. The rule in the third row permits the outbound connection the reverse shell payload opens from the victim back to the attacker's listener. This is the deliberate inverse of a segmentation control and would be unacceptable in a production network. It is accepted here so the sensor observes the complete attack chain. 
+
+pf's implicit default block per-interface inbound denies access to WAN because no rule on ATTACKER_INT or VICTIM_INT permits a WAN destination. WAN_INT has no rules at all, so nothing from the home LAN can enter the lab. This is deliberate because the project does not need the attacker or victim to communicate with the outside. 
 
 ## IDS design ##
 
